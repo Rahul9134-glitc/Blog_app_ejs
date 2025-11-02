@@ -1,27 +1,26 @@
 import Post from "../models/post.js";
 import User from "../models/user.js";
 import cloudinary from "../config/cloudinary.js";
+import bcrypt from "bcryptjs";
 import fs from "fs";
 
 export const getUserProfile = async (req, res) => {
     try {
         const userId = req.params.id;
         
-        // 1. यूज़र डेटा फ़ेच करें
-        const user = await User.findById(userId).select('-password'); // पासवर्ड छुपाएँ
+        const user = await User.findById(userId).select('-password');
         if (!user) {
             return res.status(404).render('404', { title: 'User Not Found' });
         }
         
-        // 2. उस यूज़र की सभी पोस्ट फ़ेच करें (Author ID से)
         const posts = await Post.find({ author: userId })
                                 .sort({ createdAt: -1 })
                                 .populate('author', 'username');
 
         res.render('profile', {
             title: `${user.username}'s Profile`,
-            profileUser: user, // यह वह यूज़र है जिसकी प्रोफ़ाइल हम देख रहे हैं
-            userPosts: posts   // उस यूज़र की पोस्ट्स
+            profileUser: user,
+            userPosts: posts
         });
 
     } catch (err) {
@@ -52,14 +51,15 @@ export const updateProfile = async (req, res) => {
     let profileImagePath = oldProfileImage;
 
     try {
-        // 1. Image Upload Logic
         if (req.file) {
             const localFilePath = req.file.path;
 
-            // अगर पुरानी इमेज Cloudinary पर है और नई इमेज अपलोड हो रही है, तो पुरानी को डिलीट करें
             if (oldProfileImage && oldProfileImage.includes('cloudinary.com') && !oldProfileImage.includes('default_profile_image')) {
-                // यहाँ Cloudinary से पुरानी इमेज डिलीट करने का लॉजिक डालें (जैसा कि postController में किया था)
-                // Cloudinary deletion logic...
+                const urlParts = oldProfileImage.split('/');
+                const folderName = 'blog_profiles';
+                const publicIdWithExtension = urlParts[urlParts.length - 1];
+                const publicId = folderName + '/' + publicIdWithExtension.substring(0, publicIdWithExtension.lastIndexOf('.'));
+                await cloudinary.uploader.destroy(publicId);
             }
 
             const result = await cloudinary.uploader.upload(localFilePath, { folder: "blog_profiles" });
@@ -70,7 +70,6 @@ export const updateProfile = async (req, res) => {
             });
         }
         
-        // 2. डेटाबेस अपडेट करें
         const updatedUser = await User.findByIdAndUpdate(userId, 
             { username, bio, profileImage: profileImagePath }, 
             { new: true, runValidators: true }
@@ -95,5 +94,59 @@ export const updateProfile = async (req, res) => {
             req.flash('error', 'Error updating profile.');
         }
         res.redirect(`/users/${userId}/edit`);
+    }
+};
+
+
+export const getChangePasswordPage = async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId).select('username');
+        if (!user) {
+            req.flash('error', 'User not found.');
+            return res.redirect('/');
+        }
+        res.render('change_password', {
+            title: 'Change Password',
+            user: user
+        });
+    } catch (err) {
+        res.status(500).send('Error loading password change page.');
+    }
+};
+
+export const updatePassword = async (req, res) => {
+    const userId = req.session.userId;
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (newPassword !== confirmPassword) {
+        req.flash('error', 'New password and confirm password do not match.');
+        return res.redirect(`/users/${userId}/password`);
+    }
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            req.flash('error', 'User not found.');
+            return res.redirect('/auth/login');
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+        if (!isMatch) {
+            req.flash('error', 'Current password is incorrect.');
+            return res.redirect(`/users/${userId}/password`);
+        }
+        
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        await user.save();
+
+        req.flash('success', 'Your password has been changed successfully!');
+        res.redirect(`/users/${userId}`);
+
+    } catch (err) {
+        console.error("Password Update Error:", err);
+        req.flash('error', 'An error occurred while changing password.');
+        res.redirect(`/users/${userId}/password`);
     }
 };

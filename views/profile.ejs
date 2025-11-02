@@ -38,6 +38,11 @@
         <a href="/users/<%= profileUser._id %>/edit" class="btn edit-profile-btn">
           <i class="fa-solid fa-user-edit"></i> Edit Profile
         </a>
+
+        <!-- ✅ Change Password Button Added -->
+        <a href="/users/<%= profileUser._id %>/password" class="btn change-password-btn">
+          <i class="fa-solid fa-lock"></i> Change Password
+        </a>
       </div>
       <% } %>
     </section>
@@ -195,11 +200,12 @@ body.dark-mode {
 }
 
 /* ============================================= */
-/* EDIT BUTTON */
+/* BUTTONS */
 /* ============================================= */
 .profile-actions {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
 .edit-profile-btn {
   background-color: #ffc107;
@@ -212,6 +218,21 @@ body.dark-mode {
 }
 .edit-profile-btn:hover {
   background-color: #e0a800;
+  transform: translateY(-2px);
+}
+
+/* ✅ Change Password Button */
+.change-password-btn {
+  background-color: #28a745;
+  color: white;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.change-password-btn:hover {
+  background-color: #218838;
   transform: translateY(-2px);
 }
 
@@ -329,7 +350,8 @@ body.dark-mode {
     padding-top: 10px;
     padding-left: 0;
   }
-  .edit-profile-btn {
+  .edit-profile-btn,
+  .change-password-btn {
     width: 100%;
     text-align: center;
   }
