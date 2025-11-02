@@ -1,0 +1,258 @@
+<%- include('partials/header', { title: title }) %>
+
+<main class="edit-profile-page-main">
+  <div class="container">
+    <div class="edit-profile-card">
+      <h1 class="form-title">
+        <i class="fa-solid fa-user-pen"></i> Edit Your Profile
+      </h1>
+
+      <form
+        action="/users/<%= user._id %>/edit"
+        method="POST"
+        enctype="multipart/form-data"
+        class="edit-profile-form"
+      >
+        <!-- Current Image Preview -->
+        <div class="current-image-preview">
+          <label>Current Profile Picture</label>
+          <div class="image-wrapper">
+            <img
+              src="<%= user.profileImage %>"
+              alt="Current profile picture"
+              id="image-preview"
+              class="profile-image-preview"
+            />
+          </div>
+        </div>
+
+        <!-- Upload New Image -->
+        <div class="form-group">
+          <label for="profileImage"
+            ><i class="fa-solid fa-image"></i> Upload New Profile Image</label
+          >
+          <input
+            type="file"
+            id="profileImage"
+            name="profileImage"
+            class="form-control-file"
+            accept="image/*"
+          />
+          <small class="form-text text-muted"
+            >Max size: 2MB. Formats: JPG, PNG, GIF.</small
+          >
+        </div>
+
+        <input
+          type="hidden"
+          name="oldProfileImage"
+          value="<%= user.profileImage %>"
+        />
+
+        <!-- Username -->
+        <div class="form-group">
+          <label for="username"><i class="fa-solid fa-user"></i> Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="form-control"
+            value="<%= user.username %>"
+            required
+          />
+        </div>
+
+        <!-- Bio -->
+        <div class="form-group">
+          <label for="bio"><i class="fa-solid fa-quote-left"></i> Bio</label>
+          <textarea
+            id="bio"
+            name="bio"
+            class="form-control"
+            rows="4"
+            maxlength="250"
+          ><%= user.bio %></textarea>
+          <small class="form-text text-muted"
+            >Maximum 250 characters.</small
+          >
+        </div>
+
+        <!-- Buttons -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary save-btn">
+            <i class="fa-solid fa-save"></i> Save Changes
+          </button>
+          <a href="/users/<%= user._id %>" class="btn btn-secondary cancel-btn">
+            <i class="fa-solid fa-arrow-left"></i> Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
+
+<script>
+// Image Preview Script
+document.getElementById("profileImage").addEventListener("change", (event) => {
+  const [file] = event.target.files;
+  if (file) {
+    document.getElementById("image-preview").src = URL.createObjectURL(file);
+  }
+});
+</script>
+
+<style>
+/* ============================================= */
+/* EDIT PROFILE STYLES */
+/* ============================================= */
+.edit-profile-page-main {
+  padding: 60px 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.edit-profile-card {
+  max-width: 650px;
+  margin: 0 auto;
+  background-color: var(--card-bg);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.edit-profile-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+}
+
+.form-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-color);
+  text-align: center;
+  margin-bottom: 25px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+/* Image Section */
+.current-image-preview {
+  text-align: center;
+  margin-bottom: 25px;
+}
+.image-wrapper {
+  display: inline-block;
+  padding: 5px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #007bff, #00c851);
+}
+.profile-image-preview {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--card-bg);
+  transition: transform 0.3s ease;
+}
+.profile-image-preview:hover {
+  transform: scale(1.05);
+}
+
+/* Form */
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+}
+.form-control,
+.form-control-file {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: border-color 0.3s ease;
+}
+.form-control:focus,
+.form-control-file:focus {
+  border-color: #007bff;
+  outline: none;
+}
+textarea.form-control {
+  resize: vertical;
+}
+.form-text {
+  color: #999;
+  font-size: 0.85em;
+}
+
+/* Buttons */
+.form-actions {
+  margin-top: 30px;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.save-btn {
+  background: linear-gradient(90deg, #28a745, #34ce57);
+  color: white;
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: none;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+.save-btn:hover {
+  background: linear-gradient(90deg, #218838, #2eb82e);
+  transform: translateY(-2px);
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+  padding: 10px 22px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.cancel-btn:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+}
+
+/* ============================================= */
+/* RESPONSIVE */
+/* ============================================= */
+@media (max-width: 768px) {
+  .edit-profile-card {
+    padding: 25px;
+  }
+  .form-title {
+    font-size: 1.7rem;
+  }
+  .profile-image-preview {
+    width: 110px;
+    height: 110px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

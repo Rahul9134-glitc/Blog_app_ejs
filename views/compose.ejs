@@ -1,0 +1,228 @@
+<%- include('partials/header', { title: "Create Post" }) %>
+
+<main class="compose-page">
+  <div class="container">
+    <div class="compose-card">
+      <h1>Create New Blog Post ✍️</h1>
+      <p class="subtitle">Write your thoughts in Markdown and preview them live.</p>
+
+      <form action="/compose" method="POST" enctype="multipart/form-data" id="composeForm">
+
+        <!-- TITLE -->
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" class="form-control" placeholder="Enter your blog title..." required>
+        </div>
+
+        <!-- SNIPPET -->
+        <div class="form-group">
+          <label for="snippet">Snippet (Short Summary)</label>
+          <input type="text" id="snippet" name="snippet" class="form-control" placeholder="Short summary for home page..." required>
+        </div>
+
+        <!-- COVER IMAGE -->
+        <div class="form-group">
+          <label for="coverImage">Cover Image</label>
+          <input type="file" id="coverImage" name="coverImage" class="form-control" accept="image/*">
+          <input type="hidden" name="defaultCover" value="/uploads/default-cover.png">
+        </div>
+
+        <!-- CONTENT (MARKDOWN) -->
+        <div class="form-group markdown-editor">
+          <label for="content">Content (Markdown Supported)</label>
+          <div class="editor-preview">
+            <textarea id="content" name="content" class="form-control markdown-area" rows="15" placeholder="Write your blog content here..." required></textarea>
+            <div class="preview-box" id="markdownPreview"></div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Publish Post</button>
+          <a href="/" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Cancel</a>
+        </div>
+      </form>
+
+      <hr>
+
+      <!-- MARKDOWN GUIDE -->
+      <div class="markdown-guide">
+        <h3>📘 Markdown Quick Guide</h3>
+        <ul>
+          <li><code>**Bold Text**</code> → <b>Bold Text</b></li>
+          <li><code>*Italic Text*</code> → <i>Italic Text</i></li>
+          <li><code># Heading 1</code>, <code>## Heading 2</code></li>
+          <li><code>***Bold & Italic***</code></li>
+          <li><code>> Blockquote</code></li>
+          <li><code>- List Item</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
+
+<!-- FontAwesome + Markdown Parser -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+  const contentInput = document.getElementById('content');
+  const previewBox = document.getElementById('markdownPreview');
+
+  // Initial render
+  previewBox.innerHTML = marked.parse(contentInput.value || "");
+
+  // Update live preview
+  contentInput.addEventListener('input', () => {
+    previewBox.innerHTML = marked.parse(contentInput.value);
+  });
+</script>
+
+<style>
+  body {
+    background: #f4f6f8;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px;
+  }
+
+  .compose-card {
+    background: #fff;
+    padding: 35px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  h1 {
+    font-size: 2em;
+    color: #222;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    color: #777;
+    margin-bottom: 25px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+
+  input[type="file"] {
+    background: #fafafa;
+  }
+
+  /* Markdown Editor + Preview */
+  .editor-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  textarea.markdown-area {
+    font-family: monospace;
+    resize: vertical;
+    min-height: 400px;
+  }
+
+  .preview-box {
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    overflow-y: auto;
+    min-height: 400px;
+  }
+
+  .preview-box h1, .preview-box h2, .preview-box h3 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+  }
+
+  .preview-box pre {
+    background-color: #272822;
+    color: #f8f8f2;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
+
+  /* Buttons */
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 25px;
+  }
+
+  .btn {
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1em;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  /* Markdown Guide */
+  .markdown-guide {
+    background: #f8f9fa;
+    border: 1px dashed #ced4da;
+    border-radius: 6px;
+    padding: 20px;
+    margin-top: 25px;
+  }
+
+  .markdown-guide ul {
+    list-style: disc;
+    padding-left: 20px;
+  }
+
+  .markdown-guide code {
+    background: #e9ecef;
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .editor-preview {
+      grid-template-columns: 1fr;
+    }
+
+    .preview-box {
+      margin-top: 15px;
+    }
+  }
+</style>

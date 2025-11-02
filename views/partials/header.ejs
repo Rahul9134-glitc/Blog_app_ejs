@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'My Express Blog' %></title>
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <!-- Logo -->
+    <a href="/" class="logo">
+      <span class="logo-mark">R</span>
+      <span class="logo-text">Rahul’s Blog</span>
+    </a>
+
+    <!-- Mobile Menu Toggle -->
+    <input type="checkbox" id="menu-toggle">
+    <label for="menu-toggle" class="menu-icon">
+      <span></span><span></span><span></span>
+    </label>
+
+    <!-- Nav Links -->
+    <nav class="nav-links">
+      <a href="/" class="<%= title === 'Home' ? 'active' : '' %>">Home</a>
+      <a href="/compose" class="<%= title === 'New Post' ? 'active' : '' %>">New Post</a>
+      <a href="/about" class="<%= title === 'About' ? 'active' : '' %>">About</a>
+      <a href="/contact" class="<%= title === 'Contact' ? 'active' : '' %>">Contact</a>
+
+      <!-- Search -->
+      <form action="/search" method="get" class="search-form">
+        <input type="text" name="q" placeholder="Search..." />
+        <button type="submit"><i class="bi bi-search"></i></button>
+      </form>
+
+      <!-- Theme Toggle -->
+      <button id="theme-toggle" class="theme-btn" title="Toggle theme">
+        <i class="bi bi-moon"></i>
+      </button>
+
+      <!-- Auth Section -->
+      <% if (isLoggedIn && currentUser) { %>
+        <div class="user-menu">
+          <a href="/users/<%= currentUser._id %>" class="profile-icon" title="Profile">
+            <i class="bi bi-person-circle"></i>
+            <span class="username"><%= currentUser.username %></span>
+          </a>
+          <a href="/auth/logout" class="logout-link" title="Logout">
+            <i class="bi bi-box-arrow-right"></i>
+          </a>
+        </div>
+      <% } else { %>
+        <div class="auth-links">
+          <a href="/auth/login" class="btn btn-login">Login</a>
+          <a href="/auth/register" class="btn btn-signup">Sign Up</a>
+        </div>
+      <% } %>
+    </nav>
+  </div>
+</header>
+
+<!-- Flash Messages -->
+<% if (success && success.length) { %>
+  <div class="alert alert-success"><%= success %></div>
+<% } %>
+
+<% if (error && error.length) { %>
+  <div class="alert alert-danger"><%= error %></div>
+<% } %>
+
+<script>
+// 🌙 Dark/Light Theme (Global Persistence)
+const themeBtn = document.getElementById('theme-toggle');
+const currentTheme = localStorage.getItem('theme') || 'light';
+document.body.classList.toggle('dark', currentTheme === 'dark');
+themeBtn.innerHTML = currentTheme === 'dark'
+  ? '<i class="bi bi-sun"></i>'
+  : '<i class="bi bi-moon"></i>';
+
+themeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  const newTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
+  localStorage.setItem('theme', newTheme);
+  themeBtn.innerHTML = newTheme === 'dark'
+    ? '<i class="bi bi-sun"></i>'
+    : '<i class="bi bi-moon"></i>';
+});
+</script>
+
+<style>
+/* 🌈 Base */
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* 🌐 Navbar */
+.navbar {
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.navbar .container {
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 0 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 🔷 Logo */
+.logo {
+  text-decoration: none;
+  color: var(--text);
+  font-weight: bold;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.logo-mark {
+  background: #007bff;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+/* 🔗 Nav Links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.nav-links a {
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 500;
+  position: relative;
+  padding: 5px 8px;
+}
+.nav-links a.active {
+  color: #007bff;
+}
+.nav-links a.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #007bff;
+  border-radius: 3px;
+}
+.nav-links a:hover {
+  color: #007bff;
+}
+
+/* 🔍 Search */
+.search-form {
+  display: flex;
+  align-items: center;
+}
+.search-form input {
+  padding: 5px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px 0 0 4px;
+  background: var(--input-bg);
+  color: var(--text);
+}
+.search-form button {
+  padding: 5px 10px;
+  background: #007bff;
+  border: none;
+  color: #fff;
+  border-radius: 0 4px 4px 0;
+}
+
+/* 🌗 Theme Button */
+.theme-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--text);
+}
+
+/* 🔐 Auth Buttons */
+.auth-links a {
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-weight: 500;
+}
+.btn-login {
+  background: #007bff;
+  color: white;
+}
+.btn-signup {
+  background: #28a745;
+  color: white;
+}
+.btn-login:hover { background: #0b5ed7; }
+.btn-signup:hover { background: #218838; }
+
+/* 👤 User Menu */
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.user-menu .username {
+  font-weight: 600;
+  color: var(--text);
+}
+.logout-link {
+  background: #dc3545;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+.logout-link:hover {
+  background: #c82333;
+}
+
+/* ⚠️ Flash Messages */
+.alert {
+  padding: 10px 15px;
+  margin: 10px auto;
+  width: 90%;
+  max-width: 800px;
+  border-radius: 5px;
+  font-weight: 500;
+  text-align: center;
+}
+.alert-success { background: #d4edda; color: #155724; }
+.alert-danger { background: #f8d7da; color: #721c24; }
+
+/* 🌑 Dark Mode */
+:root {
+  --header-bg: #ffffff;
+  --text: #222;
+  --border-color: #ddd;
+  --input-bg: #fff;
+}
+body.dark {
+  --header-bg: #181818;
+  --text: #f1f1f1;
+  --border-color: #444;
+  --input-bg: #2a2a2a;
+  background: #121212;
+  color: #f1f1f1;
+}
+
+/* 📱 Responsive */
+@media (max-width: 768px) {
+  .nav-links {
+    flex-direction: column;
+    background: var(--header-bg);
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 220px;
+    padding: 15px;
+    border-top: 1px solid var(--border-color);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: 0.3s ease;
+  }
+  #menu-toggle:checked + label + .nav-links {
+    transform: scaleY(1);
+  }
+  .auth-links, .user-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+</style>

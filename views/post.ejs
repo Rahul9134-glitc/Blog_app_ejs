@@ -1,0 +1,352 @@
+<%- include('partials/header', { title: post.title }) %>
+
+<main class="single-post-page">
+  <div class="page-container">
+    <article class="post-article">
+
+      <!-- 🖼️ Main Cover -->
+      <div class="main-cover-container">
+        <img src="<%= post.coverImage %>" alt="<%= post.title %> cover image" class="main-cover-image">
+      </div>
+
+      <!-- 📝 Title -->
+      <h1 class="post-title"><%= post.title %></h1>
+
+      <!-- 📅 Meta Info -->
+      <div class="post-meta">
+        <div class="meta-item">
+          <i class="fa-regular fa-calendar"></i>
+          <span><%= post.createdAt.toDateString() %></span>
+        </div>
+
+        <div class="meta-item author-meta">
+          <i class="fa-solid fa-user-pen"></i>
+          <a href="/users/<%= post.author._id %>" class="author-link">
+            <%= post.author.username %>
+          </a>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- 📖 Post Content -->
+      <div class="post-content">
+        <%- htmlContent %>
+      </div>
+
+      <hr class="divider">
+
+      <!-- ⚙️ Post Actions -->
+      <div class="post-actions">
+        <% if (isLoggedIn && currentUser._id.toString() === post.author._id.toString()) { %>
+          <a href="/posts/<%= post._id %>/edit" class="btn edit-btn">
+            <i class="fa-solid fa-pen"></i> Edit
+          </a>
+
+          <form action="/posts/<%= post._id %>/delete?_method=DELETE" method="POST" class="delete-form">
+            <button type="submit" class="btn delete-btn"
+              onclick="return confirm('Are you sure you want to delete this post? This action is irreversible.');">
+              <i class="fa-solid fa-trash"></i> Delete
+            </button>
+          </form>
+        <% } %>
+
+        <a href="/" class="btn back-btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
+      </div>
+
+      <hr class="divider review-divider">
+
+      <!-- 💬 Reviews Section -->
+      <div class="reviews-section">
+        <h2>Reviews (<%= post.reviews.length %>)</h2>
+
+        <% if (isLoggedIn) { %>
+          <div class="review-form-container">
+            <h3>Leave a Review</h3>
+            <form action="/posts/<%= post._id %>/reviews" method="POST" class="review-form">
+              <div class="form-group">
+                <textarea name="content" class="form-control" rows="3" 
+                  placeholder="Share your thoughts on this post..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary review-submit-btn">
+                <i class="fa-solid fa-comment"></i> Submit Review
+              </button>
+            </form>
+          </div>
+        <% } else { %>
+          <p class="login-prompt">
+            Please <a href="/auth/login" class="auth-link">Login</a> to leave a review.
+          </p>
+        <% } %>
+
+        <!-- 🧩 Reviews Grid -->
+        <div class="reviews-list">
+          <% if (post.reviews && post.reviews.length > 0) { %>
+            <% post.reviews.forEach(function(review) { %>
+              <div class="review-item">
+                <div class="review-header">
+                  <span class="review-author">
+                    <i class="fa-solid fa-user"></i> 
+                  <a href="/users/<%= review.author._id %>"><strong><%= review.author.username %></strong></a>
+                  </span>
+                  <span class="review-date">
+                    <%= review.createdAt.toLocaleDateString() %>
+                  </span>
+                </div>
+
+                <p class="review-content"><%= review.content %></p>
+
+                <% if (isLoggedIn && currentUser._id.toString() === review.author._id.toString()) { %>
+                  <form action="/posts/<%= post._id %>/reviews/<%= review._id %>?_method=DELETE" 
+                        method="POST" class="review-delete-form">
+                    <button type="submit" class="btn review-delete-btn"
+                      onclick="return confirm('Are you sure you want to delete your review?');">
+                      <i class="fa-solid fa-trash-can"></i> Delete
+                    </button>
+                  </form>
+                <% } %>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <p class="no-reviews">No reviews yet. Be the first to comment!</p>
+          <% } %>
+        </div>
+      </div>
+    </article>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<style>
+/* ============================================= */
+/* GLOBAL PAGE LAYOUT                            */
+/* ============================================= */
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-color: #f8f9fa;
+  --text-color: #212529;
+  --card-bg: #ffffff;
+  --border-color: #e0e0e0;
+}
+
+body.dark-mode {
+  --bg-color: #121212;
+  --text-color: #f1f1f1;
+  --card-bg: #1e1e1e;
+  --border-color: #333;
+}
+
+.page-container {
+  max-width: 950px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* ============================================= */
+/* POST ARTICLE CARD                             */
+/* ============================================= */
+.post-article {
+  background-color: var(--card-bg);
+  padding: 40px;
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.main-cover-container {
+  margin-bottom: 25px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.main-cover-image {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  border-radius: 12px;
+  transition: transform 0.4s ease;
+}
+.main-cover-container:hover .main-cover-image {
+  transform: scale(1.03);
+}
+
+.post-title {
+  font-size: 2.6em;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.post-meta {
+  display: flex;
+  gap: 12px;
+  color: #6c757d;
+  font-size: 0.95em;
+  margin-bottom: 20px;
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+  border: none;
+  margin: 30px 0;
+}
+
+.post-content {
+  font-size: 1.15em;
+  line-height: 1.8;
+}
+
+.post-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.edit-btn {
+  background-color: #ffc107;
+  color: #222;
+}
+.edit-btn:hover { background-color: #e0a800; }
+
+.delete-btn {
+  background-color: #dc3545;
+  color: #fff;
+}
+.delete-btn:hover { background-color: #c82333; }
+
+.back-btn {
+  background-color: #6c757d;
+  color: white;
+}
+.back-btn:hover { background-color: #5a6268; }
+
+/* ============================================= */
+/* REVIEWS SECTION                               */
+/* ============================================= */
+.reviews-section {
+  margin-top: 40px;
+}
+
+.reviews-section h2 {
+  font-size: 1.8em;
+  margin-bottom: 25px;
+}
+
+.review-form-container {
+  background-color: var(--card-bg);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 40px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.review-form textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  resize: vertical;
+}
+
+.review-submit-btn {
+  background-color: #007bff;
+  color: white;
+  margin-top: 15px;
+}
+.review-submit-btn:hover {
+  background-color: #0056b3;
+}
+
+.reviews-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.review-item {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 15px 20px;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: 0.3s ease;
+}
+.review-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #6c757d;
+}
+
+.review-content {
+  font-size: 1em;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+/* ✅ Delete Button Now Below Date */
+.review-delete-form {
+  margin-top: 8px;
+  text-align: right;
+  position: static;
+}
+
+.review-delete-btn {
+  border: none;
+  background: none;
+  color: #dc3545;
+  font-size: 0.9em;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.review-delete-btn:hover {
+  color: #c82333;
+  opacity: 1;
+}
+
+.no-reviews {
+  text-align: center;
+  padding: 20px;
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: #888;
+}
+
+/* ============================================= */
+/* RESPONSIVE DESIGN                             */
+/* ============================================= */
+@media (max-width: 768px) {
+  .post-article { padding: 25px; }
+  .post-title { font-size: 2em; }
+  .reviews-list { grid-template-columns: 1fr; }
+  .main-cover-image { max-height: 300px; }
+}
+</style>

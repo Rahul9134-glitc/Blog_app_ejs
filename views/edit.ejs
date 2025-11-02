@@ -1,0 +1,224 @@
+<%- include('partials/header', { title: `Edit: ${post.title}` }) %>
+
+<main class="edit-page">
+  <div class="container">
+    <h1>Edit Post</h1>
+    <p class="subtitle">Make changes and see live preview below 👇</p>
+
+    <form action="/posts/<%= post._id %>/?_method=PUT" method="POST" enctype="multipart/form-data">
+      
+      <!-- Title -->
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          class="form-control" 
+          value="<%= post.title %>" 
+          required>
+      </div>
+
+      <!-- Snippet -->
+      <div class="form-group">
+        <label for="snippet">Snippet (Short Summary)</label>
+        <input 
+          type="text" 
+          id="snippet" 
+          name="snippet" 
+          class="form-control" 
+          value="<%= post.snippet %>" 
+          required>
+      </div>
+
+      <!-- Current Cover Image Preview -->
+      <div class="form-group">
+        <label>Current Cover Image</label><br>
+        <% if (post.coverImage) { %>
+          <img src="<%= post.coverImage %>" alt="Current cover" class="preview-img">
+        <% } else { %>
+          <p class="no-image">No image uploaded yet</p>
+        <% } %>
+      </div>
+
+      <!-- Upload New Image -->
+      <div class="form-group">
+        <label for="coverImage">Change Cover Image</label>
+        <input 
+          type="file" 
+          id="coverImage" 
+          name="coverImage" 
+          class="form-control" 
+          accept="image/*">
+      </div>
+
+      <!-- Markdown Editor + Live Preview -->
+      <div class="form-group markdown-group">
+        <label for="content">Content (Markdown Supported)</label>
+        <div class="editor-preview">
+          <textarea 
+            id="content" 
+            name="content" 
+            class="form-control markdown-area" 
+            rows="15" 
+            required><%= post.content %></textarea>
+          
+          <div class="preview-box" id="markdownPreview"></div>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success">
+          <i class="fa-solid fa-save"></i> Save Changes
+        </button>
+        <a href="/posts/<%= post._id %>" class="btn btn-secondary">
+          <i class="fa-solid fa-arrow-left"></i> Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
+
+<!-- Font Awesome + Markdown Parser -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+  const contentInput = document.getElementById('content');
+  const previewBox = document.getElementById('markdownPreview');
+
+  // Initial render
+  previewBox.innerHTML = marked.parse(contentInput.value);
+
+  // Update live as user types
+  contentInput.addEventListener('input', () => {
+    previewBox.innerHTML = marked.parse(contentInput.value);
+  });
+</script>
+
+<style>
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px;
+  }
+
+  h1 {
+    margin-bottom: 10px;
+    font-size: 2em;
+    color: #222;
+  }
+
+  .subtitle {
+    color: #777;
+    margin-bottom: 25px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  /* Preview Image */
+  .preview-img {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .no-image {
+    color: #999;
+    font-style: italic;
+  }
+
+  /* Markdown Editor + Preview Side-by-Side */
+  .editor-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  textarea.form-control {
+    font-family: monospace;
+    resize: vertical;
+    min-height: 400px;
+  }
+
+  .preview-box {
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    overflow-y: auto;
+    min-height: 400px;
+  }
+
+  .preview-box h1, .preview-box h2, .preview-box h3 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+  }
+
+  .preview-box pre {
+    background-color: #272822;
+    color: #f8f8f2;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 25px;
+  }
+
+  .btn {
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1em;
+  }
+
+  .btn-success {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  /* ✅ Responsive Design */
+  @media (max-width: 900px) {
+    .editor-preview {
+      grid-template-columns: 1fr;
+    }
+    .preview-box {
+      margin-top: 15px;
+    }
+  }
+</style>

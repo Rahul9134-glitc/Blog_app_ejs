@@ -1,0 +1,353 @@
+<%- include('partials/header', { title: title }) %>
+
+<main class="profile-page-main">
+  <div class="container">
+
+    <!-- ================= PROFILE HEADER ================= -->
+    <section class="profile-header-card">
+      <div class="profile-info-container">
+        <div class="profile-image-wrapper">
+          <img src="<%= profileUser.profileImage %>" alt="<%= profileUser.username %> profile picture" class="profile-image">
+        </div>
+
+        <div class="user-details">
+          <h1 class="profile-username">
+            <%= profileUser.username %>
+            <i class="fa-solid fa-check-circle verified-icon"></i>
+          </h1>
+
+          <p class="profile-meta">
+            <i class="fa-solid fa-envelope"></i>
+            <%= profileUser.email %>
+          </p>
+
+          <p class="profile-bio">
+            <i class="fa-solid fa-quote-left"></i>
+            <%= profileUser.bio %>
+          </p>
+
+          <p class="member-since">
+            <i class="fa-solid fa-calendar-day"></i>
+            Member Since: <%= profileUser.createdAt.toDateString() %>
+          </p>
+        </div>
+      </div>
+
+      <% if (currentUser && currentUser._id.toString() === profileUser._id.toString()) { %>
+      <div class="profile-actions">
+        <a href="/users/<%= profileUser._id %>/edit" class="btn edit-profile-btn">
+          <i class="fa-solid fa-user-edit"></i> Edit Profile
+        </a>
+      </div>
+      <% } %>
+    </section>
+
+    <!-- ================= USER POSTS ================= -->
+    <section class="user-posts-section">
+      <h2 class="section-title">
+        <%= profileUser.username %>'s Latest Posts (<%= userPosts.length %>)
+      </h2>
+
+      <% if (userPosts.length > 0) { %>
+      <div class="posts-list-grid">
+        <% userPosts.forEach(function(post) { %>
+        <div class="post-card">
+          <div class="post-card-image-wrapper">
+            <img src="<%= post.coverImage %>" alt="<%= post.title %> cover" class="post-card-image">
+          </div>
+          <div class="post-card-content">
+            <a href="/posts/<%= post._id %>" class="post-card-title"><%= post.title %></a>
+            <p class="post-card-snippet"><%= post.snippet %></p>
+            <div class="post-card-meta">
+              <span class="meta-date">
+                <i class="fa-regular fa-calendar"></i>
+                <%= post.createdAt.toDateString() %>
+              </span>
+            </div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      <% } else { %>
+      <div class="no-posts-message">
+        <i class="fa-solid fa-file-alt"></i>
+        <p><%= profileUser.username %> has not published any posts yet.</p>
+      </div>
+      <% } %>
+    </section>
+
+  </div>
+</main>
+
+<%- include('partials/footer') %>
+
+<style>
+/* ============================================= */
+/* GLOBAL BASE */
+/* ============================================= */
+:root {
+  --bg-color: #f8f9fa;
+  --text-color: #212529;
+  --card-bg: #ffffff;
+  --border-color: #e0e0e0;
+}
+
+body.dark-mode {
+  --bg-color: #121212;
+  --text-color: #f1f1f1;
+  --card-bg: #1e1e1e;
+  --border-color: #333;
+}
+
+.profile-page-main {
+  padding: 50px 0;
+  background-color: var(--bg-color);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ============================================= */
+/* PROFILE HEADER CARD */
+/* ============================================= */
+.profile-header-card {
+  background-color: var(--card-bg);
+  padding: 35px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 30px;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.profile-header-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.profile-info-container {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.profile-image-wrapper {
+  flex-shrink: 0;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #007bff;
+  box-shadow: 0 0 12px rgba(0,123,255,0.3);
+  transition: transform 0.4s ease;
+}
+.profile-image-wrapper:hover {
+  transform: scale(1.05);
+}
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-details {
+  color: var(--text-color);
+  flex: 1;
+  min-width: 250px;
+}
+
+.profile-username {
+  font-size: 2.2em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.verified-icon {
+  color: #007bff;
+}
+
+.profile-meta {
+  font-size: 0.95em;
+  color: #6c757d;
+  margin: 10px 0;
+}
+
+.profile-bio {
+  font-style: italic;
+  margin: 15px 0;
+  padding-left: 10px;
+  border-left: 4px solid #007bff;
+  color: var(--text-color);
+}
+
+.member-since {
+  font-size: 0.9em;
+  color: #888;
+}
+
+/* ============================================= */
+/* EDIT BUTTON */
+/* ============================================= */
+.profile-actions {
+  display: flex;
+  align-items: center;
+}
+.edit-profile-btn {
+  background-color: #ffc107;
+  color: #333;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.edit-profile-btn:hover {
+  background-color: #e0a800;
+  transform: translateY(-2px);
+}
+
+/* ============================================= */
+/* USER POSTS SECTION */
+/* ============================================= */
+.user-posts-section {
+  margin-top: 60px;
+}
+.section-title {
+  font-size: 1.8em;
+  color: var(--text-color);
+  margin-bottom: 30px;
+  border-bottom: 3px solid var(--border-color);
+  padding-bottom: 10px;
+  text-align: center;
+}
+
+.posts-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 25px;
+}
+
+.post-card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+.post-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.post-card-image-wrapper {
+  overflow: hidden;
+}
+.post-card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.post-card:hover .post-card-image {
+  transform: scale(1.07);
+}
+
+.post-card-content {
+  padding: 18px;
+  flex: 1;
+}
+
+.post-card-title {
+  font-size: 1.25em;
+  font-weight: 600;
+  color: #007bff;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 6px;
+  transition: color 0.3s ease;
+}
+.post-card-title:hover {
+  color: #0056b3;
+}
+
+.post-card-snippet {
+  font-size: 0.9em;
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+.meta-date {
+  font-size: 0.8em;
+  color: #999;
+}
+
+/* ============================================= */
+/* NO POSTS MESSAGE */
+/* ============================================= */
+.no-posts-message {
+  text-align: center;
+  padding: 60px;
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  color: #777;
+  font-size: 1.1em;
+}
+.no-posts-message i {
+  font-size: 2.5em;
+  margin-bottom: 15px;
+  display: block;
+}
+
+/* ============================================= */
+/* RESPONSIVE DESIGN */
+/* ============================================= */
+@media (max-width: 992px) {
+  .profile-header-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .profile-info-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .profile-bio {
+    border-left: none;
+    border-top: 3px solid #007bff;
+    padding-top: 10px;
+    padding-left: 0;
+  }
+  .edit-profile-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-image-wrapper {
+    width: 120px;
+    height: 120px;
+  }
+  .profile-username {
+    font-size: 1.8em;
+  }
+  .post-card-image {
+    height: 170px;
+  }
+  .section-title {
+    font-size: 1.5em;
+  }
+}
+</style>

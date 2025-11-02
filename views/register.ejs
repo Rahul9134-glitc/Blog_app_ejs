@@ -1,0 +1,212 @@
+<%- include('partials/header', { title: 'Register' }) %>
+
+<main class="auth-page">
+  <div class="container">
+    <div class="register-card">
+      <h2 class="card-title">Create your account</h2>
+      <p class="card-sub">Join the community — share your ideas and stories.</p>
+
+      <form id="registerForm" action="/auth/register" method="POST" novalidate>
+        <!-- USERNAME -->
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            class="form-control"
+            placeholder="Choose a username"
+            required
+            minlength="3"
+            maxlength="30"
+            autocomplete="username">
+          <div class="invalid-msg" id="usernameError"></div>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            class="form-control"
+            placeholder="you@example.com"
+            required
+            autocomplete="email">
+          <div class="invalid-msg" id="emailError"></div>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input
+              id="password"
+              name="password"
+              type="password"
+              class="form-control"
+              placeholder="At least 8 characters"
+              required
+              minlength="8"
+              autocomplete="new-password">
+            <button type="button" id="togglePassword" class="pw-toggle" aria-label="Show password">👁️</button>
+          </div>
+          <div class="invalid-msg" id="passwordError"></div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Create account</button>
+          <a href="/login" class="btn btn-outline">Already have an account?</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
+
+<!-- Inline styles (move to public/css/styles.css if you prefer) -->
+<style>
+  :root{
+    --max-width: 980px;
+    --card-bg: #ffffff;
+    --muted: #6c757d;
+    --accent: #0d6efd;
+    --radius: 12px;
+  }
+
+  body { background: #f7f9fc; color: #111; font-family: Inter, system-ui, -apple-system, sans-serif; }
+
+  .container { max-width: var(--max-width); margin: 0 auto; padding: 28px 20px; }
+
+  /* center card */
+  .register-card {
+    max-width: 520px;
+    margin: 28px auto;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    margin: 0 0 6px;
+    font-weight: 700;
+  }
+  .card-sub {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 18px;
+  }
+
+  .form-group { margin-bottom: 14px; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.95rem; }
+  .form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e6e9ee;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .form-control:focus { box-shadow: 0 6px 18px rgba(13,110,253,0.08); border-color: var(--accent); }
+
+  /* password field with toggle */
+  .password-wrap { position: relative; display: flex; align-items: center; }
+  .pw-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    padding: 6px;
+    border-radius: 6px;
+  }
+  .pw-toggle:focus { outline: 2px solid rgba(13,110,253,0.15); }
+
+  .invalid-msg { color: #d0342c; font-size: 0.85rem; margin-top: 6px; min-height: 18px; }
+
+  /* buttons */
+  .form-actions { display: flex; gap: 10px; margin-top: 12px; align-items: center; }
+  .btn {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-size: 0.95rem;
+  }
+  .btn-primary { background: var(--accent); color: white; box-shadow: 0 6px 18px rgba(13,110,253,0.12); }
+  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: #333; border: 1px solid #e6e9ee; padding: 9px 12px; }
+
+  /* small screens */
+  @media (max-width: 520px) {
+    .register-card { padding: 20px; margin: 18px 12px; }
+    .form-actions { flex-direction: column; align-items: stretch; }
+    .btn-outline { width: 100%; text-align: center; }
+  }
+</style>
+
+<!-- Client-side JS (toggle visibility + basic validation) -->
+<script>
+  (function(){
+    const form = document.getElementById('registerForm');
+    const username = document.getElementById('username');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+
+    const usernameError = document.getElementById('usernameError');
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+
+    // password toggle
+    const toggleBtn = document.getElementById('togglePassword');
+    toggleBtn.addEventListener('click', () => {
+      const type = password.type === 'password' ? 'text' : 'password';
+      password.type = type;
+      toggleBtn.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+
+    // simple validators
+    function validateEmail(val){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+    }
+    function clearErrors(){
+      usernameError.textContent = '';
+      emailError.textContent = '';
+      passwordError.textContent = '';
+    }
+
+    form.addEventListener('submit', (e) => {
+      clearErrors();
+      let ok = true;
+
+      if (!username.value || username.value.trim().length < 3) {
+        usernameError.textContent = 'Username should be at least 3 characters.';
+        ok = false;
+      }
+      if (!validateEmail(email.value)) {
+        emailError.textContent = 'Please enter a valid email address.';
+        ok = false;
+      }
+      if (!password.value || password.value.length < 8) {
+        passwordError.textContent = 'Password must be at least 8 characters.';
+        ok = false;
+      }
+
+      if (!ok) {
+        e.preventDefault();
+        return false;
+      }
+
+      // otherwise allow submit (server-side should re-validate!)
+    });
+  })();
+</script>
