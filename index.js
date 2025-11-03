@@ -17,6 +17,8 @@ const port = process.env.PORT || 8080
 dotenv.config();
 mongoConnect();
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 app.use(methodOverride("_method"));
 app.set ("view engine" , "ejs");
 app.use(express.static("public"));
@@ -36,11 +38,10 @@ app.use(session({
         autoRemoveInterval: 10
     }),
     cookie: { 
-    
-        secure: process.env.NODE_ENV === 'production', 
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: isProduction, 
+        sameSite: isProduction ? 'none' : 'lax',
         maxAge: 1000 * 60 * 60 * 24
-    } 
+    }
 }));
 
 app.use(flash());
